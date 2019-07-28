@@ -1,0 +1,172 @@
+#IMPORTACION DE DATASET
+library(readr)
+library("corrplot")
+library("RColorBrewer")
+library("REdaS")
+pulsar_stars <- read_csv("C:/Users/GOR/Downloads/pulsar_stars.csv")
+View(pulsar_stars)
+pulsar_stars1<- pulsar_stars[1:3000,]
+
+#liempieza de datos
+
+sapply(pulsar_stars, function(x) sum(is.na(x)))#conteo y sumatoria de datos nulos, si es que existieran
+
+#no hay valores nulos
+
+
+#separacion TRAINING TEST
+
+set.seed(1945)
+ind <- sample(2, nrow(pulsar_stars), replace = TRUE, prob = c(0.7, 0.3))
+data1_train <- pulsar_stars[ind == 1, ]
+data1_train= data1_train[1:2100,]
+data2_test <- pulsar_stars[ind == 2, ]
+data2_test= data2_test[1:900,]
+
+#RepresentaciÃ³n grÃ¡fica de los datos
+
+d = dist(pulsar_stars1[,1:8], method = "euclidean")
+fit = cmdscale(d,eig=TRUE, k=2) # k es el numero de dimensiones
+x = fit$points[,1] 
+y = fit$points[,2]
+plot(x,y)
+
+#RepresentaciÃ³n de correlaciones entre los datos
+
+matriz1=cbind(pulsar_stars[1:9])
+
+corr <-cor(matriz1)
+corrplot(corr, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"), method = "number",tl.cex = 0.7)
+corrplot(corr, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"),tl.cex = 0.7)
+
+#Tarea de regresiÃ³n/clasificaciÃ³n con variables originales.
+
+
+dependiente<-data1_train$targetC
+reg_log=glm(data1_train$targetC~data1_train$MediaCurva.MD_RSR+data1_train$DEstandarCurva.MD_RSR+data1_train$Ex.kurtosis.PI+data1_train$Sesgo_PI+data1_train$Ex.kurtosisCurva.MD_RSR+data1_train$SesgoCurva.MD_RSR+data1_train$Media_PI+data1_train$DEstandar_PI,family=binomial("logit"))
+
+y_estim = exp(reg_log$coefficients[1]+
+                reg_log$coefficients[2]*data2_test$MediaCurva.MD_RSR+
+                reg_log$coefficients[3]*data2_test$DEstandarCurva.MD_RSR+
+                reg_log$coefficients[4]*data2_test$Ex.kurtosis.PI+
+                reg_log$coefficients[5]*data2_test$Sesgo_PI+
+                reg_log$coefficients[6]*data2_test$Ex.kurtosisCurva.MD_RSR+
+                reg_log$coefficients[7]*data2_test$SesgoCurva.MD_RSR+
+                reg_log$coefficients[8]*data2_test$Media_PI+
+                reg_log$coefficients[9]*data2_test$DEstandar_PI)/(1+exp(reg_log$coefficients[1]+
+                                                                          reg_log$coefficients[2]*data2_test$MediaCurva.MD_RSR+
+                                                                          reg_log$coefficients[3]*data2_test$DEstandarCurva.MD_RSR+
+                                                                          reg_log$coefficients[4]*data2_test$Ex.kurtosis.PI+
+                                                                          reg_log$coefficients[5]*data2_test$Sesgo_PI+
+                                                                          reg_log$coefficients[6]*data2_test$Ex.kurtosisCurva.MD_RSR+
+                                                                          reg_log$coefficients[7]*data2_test$SesgoCurva.MD_RSR+
+                                                                          reg_log$coefficients[8]*data2_test$Media_PI+
+                                                                          reg_log$coefficients[9]*data2_test$DEstandar_PI))
+
+#TASA DE ACIERTOS DEL MODELO
+rango=range(y_estim) #Visualizamos el rango del vector 
+y_ordenada=sort(y_estim) #Ordenamos todos los valores del vector
+umbral=mean(rango)#Este es nuestro umbral
+y_estim_f=c()
+for(j in 1:length(y_estim)){
+  if ( y_estim[j] < umbral) {
+    y_estim_f<-append(y_estim_f, 0, after = j)
+  }
+  if ( y_estim[j] >= umbral) { 
+    y_estim_f<-append(y_estim_f, 1, after = j)
+  }
+}
+Total_TRUE=sum((y_estim_f == data2_test$targetC)*1)#suma todos los TRUE
+Tasa_Aciertos_Original=Total_TRUE/length(y_estim_f)# Porcentaje de errorm
+
+
+
+
+
+#AnÃ¡lisis factorial de los dato
+
+#formulacion del problema
+
+#analisis de la matriz de corelacion 
+
+bmatriz<-data1_train[,1:8]
+bt=bartlett.test(bmatriz)
+
+library("REdaS")
+kmo = KMOS(data1_train[,1:8])
+
+
+#extraccion de factores
+
+#metodos de componentes principales
+
+pulsar.pca = prcomp(data1_train[, 1:8], center = TRUE, scale. = TRUE) 
+print(pulsar.pca)
+plot(pulsar.pca, type = "l")
+summary(pulsar.pca)
+
+# Componentes Principales
+comp = predict(pulsar.pca, newdata=tail(data1_train[, 1:8], length(data1_train$Media_PI)))
+comp<-as.data.frame(comp)
+
+#determinacion del numero de factores
+
+summary(pulsar.pca)
+
+#interpretacion de los factores
+
+#validacion del modelo
+
+matriz2=cbind(pulsar_stars[1:8])
+
+corr <-cor(matriz2)
+corrplot(corr, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"), method = "number",tl.cex = 0.7)
+corrplot(corr, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"),tl.cex = 0.7)
+
+reg.log_pca<-glm(dependiente~comp$PC1+comp$PC2+comp$PC3,family=binomial("logit"))
+b0.pca<-reg.log_pca$coefficients[1]
+b1.pca<-reg.log_pca$coefficients[2]
+b2.pca<-reg.log_pca$coefficients[3]
+b3.pca<-reg.log_pca$coefficients[3]
+
+
+x1=comp$PC1[1:900]
+x2=comp$PC2[1:900]
+x3=comp$PC3[1:900]
+y_estim_pca=exp(b0.pca+b1.pca*x1+b2.pca*x2+b3.pca*x3)/(1+exp(b0.pca+b1.pca*x1+b2.pca*x2+b3.pca*x3))
+
+
+#TASA DE ACIERTOS DEL MODELO con PCA
+rango1=range(y_estim_pca) #Visualizamos el rango del vector 
+y_ordenada1=sort(y_estim_pca) #Ordenamos todos los valores del vector
+umbral1=mean(rango1)#Este es nuestro umbral
+
+y_estim_f_pca=c()
+for(j in 1:length(y_estim_pca)){
+  if ( y_estim_pca[j] < umbral1) {
+    y_estim_f_pca<-append(y_estim_f_pca, 0, after = j)
+  }
+  if ( y_estim_pca[j] >= umbral1) { 
+    y_estim_f_pca<-append(y_estim_f_pca, 1, after = j)
+  }
+}
+Total_TRUE1=sum((y_estim_f_pca == data2_test$targetC)*1)#suma todos los TRUE
+Tasa_Aciertos_Componentes=Total_TRUE1/length(y_estim_f_pca)# Porcentaje de errorm
+
+
+#COMPARACION
+
+if (Tasa_Aciertos_Original > Tasa_Aciertos_Componentes) { 
+  print ("La mejor opción para la predicción de datos es trabajar con la regresion logistica original con una tasa de error del 2%") 
+} else {  
+  print ("La mejor opción para la predicción de datos es trabajar con la regresion logistica de componentes principales con una tasa de error del 16%")  
+}  
+
+
+
+
+
