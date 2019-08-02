@@ -1,0 +1,296 @@
+import numpy as np
+import skfuzzy as fuzz
+import matplotlib.pyplot as plt
+
+################################################################
+# Generamos el Universo de discurso de cada variable lingüistica
+
+
+Media_PI= np.arange(6, 178, 0.1) 
+DEstandar_PI= np.arange(25, 87, 0.1)
+Sesgo_PI =np.arange(-2, 69, 0.1)
+MediaCurva_MD_RSR = np.arange(0, 212, 0.1)
+SesgoCurva_MD_RSR = np.arange(-2, 141, 0.1)
+targetC = np.arange(0, 1, 0.01)
+
+
+################################################################
+########### Generamos las funciones de pertenencia #############
+
+############## Entradas ######################
+
+
+Media_PI_baja = fuzz.trimf(Media_PI, [6, 44.5, 89])
+Media_PI_media = fuzz.trimf(Media_PI, [44.5, 89,133.5]) 
+Media_PI_alto= fuzz.trimf(Media_PI, [89,133.5,178])
+
+
+DEstandar_PI_escasa = fuzz.trimf(DEstandar_PI, [25,37.4,49.8])
+DEstandar_PI_poca = fuzz.trimf(DEstandar_PI, [37.4,49.8,62.2])
+DEstandar_PI_media = fuzz.trimf(DEstandar_PI, [49.8,62.2,74.6])
+DEstandar_PI_abundante = fuzz.trimf(DEstandar_PI, [62.2,74.6,87])
+
+Sesgo_PI_pequeño = fuzz.trimf(Sesgo_PI, [-2, 18.75, 35.5])
+Sesgo_PI_medio= fuzz.trimf(Sesgo_PI, [18.75, 35.5,52.25]) 
+Sesgo_PI_grande= fuzz.trimf(Sesgo_PI, [35.5,52.25,69])
+
+
+MediaCurva_MD_RSR_poca_concentracion = fuzz.trimf(MediaCurva_MD_RSR, [0,53,106])
+MediaCurva_MD_RSR_normal = fuzz.trimf(MediaCurva_MD_RSR, [53,106,159])
+MediaCurva_MD_RSR_bastante_concentracion = fuzz.trimf(MediaCurva_MD_RSR, [106,159,212])
+
+
+SesgoCurva_MD_RSR_sin_sesgo = fuzz.trimf(SesgoCurva_MD_RSR, [-2,36.75,71.5])
+SesgoCurva_MD_RSR_medio_sesgo = fuzz.trimf(SesgoCurva_MD_RSR, [36.75,71.5,106.75])
+SesgoCurva_MD_RSR_sesgado = fuzz.trimf(SesgoCurva_MD_RSR, [71.5,106.75,141])
+
+#################### Salida ##################
+targetC_nada = fuzz.trimf(targetC, [0,0.2,0.4])
+targetC_poco = fuzz.trimf(targetC, [0.2,0.4,0.6])
+targetC_medio = fuzz.trimf(targetC, [0.4,0.6,0.8])
+targetC_mucho = fuzz.trimf(targetC, [0.6,0.8,1])
+
+
+
+################################################################
+# Vizualización de la funciones de pertenencia
+fig, (ax0,ax1,ax2,ax3,ax4,ax5) = plt.subplots(nrows=6, figsize=(8, 9))
+
+ax0.plot(Media_PI, Media_PI_baja, 'b', linewidth=1.5, label='Baja')
+ax0.plot(Media_PI, Media_PI_media, 'g', linewidth=1.5, label='media')
+ax0.plot(Media_PI, Media_PI_alto, 'r', linewidth=1.5, label='alto')
+ax0.set_title('media del perfil integrado')
+ax0.legend()
+
+
+ax1.plot(DEstandar_PI, DEstandar_PI_escasa, 'b', linewidth=1.5, label='escasa')
+ax1.plot(DEstandar_PI, DEstandar_PI_poca, 'g', linewidth=1.5, label='poca')
+ax1.plot(DEstandar_PI, DEstandar_PI_media, 'r', linewidth=1.5, label='media')
+ax1.plot(DEstandar_PI, DEstandar_PI_abundante, 'y', linewidth=1.5, label='abundante')
+ax1.set_title('Desviacion estandar del perfil integrado')
+ax1.legend()
+
+
+ax2.plot(Sesgo_PI, Sesgo_PI_pequeño, 'b', linewidth=1.5, label='pequeño')
+ax2.plot(Sesgo_PI, Sesgo_PI_medio, 'g', linewidth=1.5, label='medio')
+ax2.plot(Sesgo_PI, Sesgo_PI_grande, 'r', linewidth=1.5, label='grande')
+ax2.set_title('sesgo del perfil integrado')
+ax2.legend()
+
+
+ax3.plot(MediaCurva_MD_RSR , MediaCurva_MD_RSR_poca_concentracion, 'b', linewidth=1.5, label='poco concentrado')
+ax3.plot(MediaCurva_MD_RSR , MediaCurva_MD_RSR_normal, 'g', linewidth=1.5, label='normal')
+ax3.plot(MediaCurva_MD_RSR , MediaCurva_MD_RSR_bastante_concentracion, 'r', linewidth=1.5, label='bastante concentrado')
+ax3.set_title('media de la curva MD_RSR')
+ax3.legend()
+
+ax4.plot(SesgoCurva_MD_RSR, SesgoCurva_MD_RSR_sin_sesgo, 'b', linewidth=1.5, label='sin sesgo')
+ax4.plot(SesgoCurva_MD_RSR , SesgoCurva_MD_RSR_medio_sesgo, 'g', linewidth=1.5, label='medio sesgado')
+ax4.plot(SesgoCurva_MD_RSR, SesgoCurva_MD_RSR_sesgado, 'r', linewidth=1.5, label='sesgado')
+ax4.set_title('sesgo de la curva de MD_RSR')
+ax4.legend()
+
+
+ax5.plot(targetC, targetC_nada, 'b', linewidth=1.5, label='nada')
+ax5.plot(targetC, targetC_poco, 'g', linewidth=1.5, label='poco')
+ax5.plot(targetC, targetC_medio, 'r', linewidth=1.5, label='medio')
+ax5.plot(targetC, targetC_mucho, 'y', linewidth=1.5, label='mucho')
+ax5.set_title('Pulsar')
+ax5.legend()
+
+
+for ax in (ax0, ax1, ax2,ax3,ax4,ax5):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
+plt.tight_layout()
+
+
+
+
+
+
+
+################################################################
+################# Generación y aplicación de Reglas#############
+
+
+#Evaluamos las funciones de pertenencia
+R_Media_PI_Baja = fuzz.interp_membership(Media_PI, Media_PI_baja, 120)
+R_Media_PI_Media = fuzz.interp_membership(Media_PI, Media_PI_media, 120)
+R_Media_PI_Alto = fuzz.interp_membership(Media_PI, Media_PI_alto, 120)
+
+R_DEstandar_PI_Escasa = fuzz.interp_membership(DEstandar_PI, DEstandar_PI_escasa, 65)
+R_DEstandar_PI_Poca = fuzz.interp_membership(DEstandar_PI, DEstandar_PI_poca, 65)
+R_DEstandar_PI_Media = fuzz.interp_membership(DEstandar_PI, DEstandar_PI_media, 65)
+R_DEstandar_PI_Abundante = fuzz.interp_membership(DEstandar_PI, DEstandar_PI_abundante, 65)
+
+R_Sesgo_PI_Pequeño = fuzz.interp_membership(Sesgo_PI, Sesgo_PI_pequeño, 50)
+R_Sesgo_PI_Medio = fuzz.interp_membership(Sesgo_PI, Sesgo_PI_medio, 50)
+R_Sesgo_PI_Grande = fuzz.interp_membership(Sesgo_PI, Sesgo_PI_grande, 50)
+
+R_MediaCurva_MD_RSR_Poca_concentracion = fuzz.interp_membership(MediaCurva_MD_RSR, MediaCurva_MD_RSR_poca_concentracion, 180)
+R_MediaCurva_MD_RSR_Normal = fuzz.interp_membership(MediaCurva_MD_RSR, MediaCurva_MD_RSR_normal, 180)
+R_MediaCurva_MD_RSR_Bastante_Concentracion = fuzz.interp_membership(MediaCurva_MD_RSR, MediaCurva_MD_RSR_bastante_concentracion, 180)
+
+R_SesgoCurva_MD_RSR_Sin_Sesgo = fuzz.interp_membership(SesgoCurva_MD_RSR, SesgoCurva_MD_RSR_sin_sesgo, 140)
+R_SesgoCurva_MD_RSR_Medio_Sesgado = fuzz.interp_membership(SesgoCurva_MD_RSR, SesgoCurva_MD_RSR_medio_sesgo, 140)
+R_SesgoCurva_MD_RSR_Sesgado = fuzz.interp_membership(SesgoCurva_MD_RSR, SesgoCurva_MD_RSR_sesgado, 140)
+
+# Ahora aplicamos las reglas. 
+rule1 = np.fmin(R_Sesgo_PI_Grande,R_Media_PI_Baja)
+tip_rule1 = np.fmin(rule1, targetC_mucho)
+rule2 = np.fmin(R_Sesgo_PI_Medio,R_Media_PI_Media)
+tip_rule2 = np.fmin(rule2, targetC_medio)
+rule3 = np.fmin(R_Sesgo_PI_Pequeño,R_Media_PI_Media)
+tip_rule3 = np.fmin(rule3, targetC_poco)
+
+rule4 = np.fmin(R_DEstandar_PI_Media,R_Sesgo_PI_Pequeño)
+tip_rule4 = np.fmin(rule4, targetC_nada)
+rule5 = np.fmin(R_DEstandar_PI_Poca,R_Sesgo_PI_Pequeño)
+tip_rule5 = np.fmin(rule5, targetC_poco)
+rule6 = np.fmin(R_DEstandar_PI_Media,R_Sesgo_PI_Grande)
+tip_rule6 = np.fmin(rule6, targetC_medio)
+
+rule7 = np.fmin(R_Media_PI_Alto,R_DEstandar_PI_Escasa)
+tip_rule7 = np.fmin(rule7, targetC_nada)
+rule8 = np.fmin(R_Media_PI_Alto,R_DEstandar_PI_Abundante)
+tip_rule8 = np.fmin(rule8, targetC_nada)
+rule9 = np.fmin(R_Media_PI_Alto,R_DEstandar_PI_Poca)
+tip_rule9 = np.fmin(rule9, targetC_poco)
+
+rule10 = np.fmin(R_MediaCurva_MD_RSR_Bastante_Concentracion,R_SesgoCurva_MD_RSR_Sin_Sesgo)
+tip_rule10 = np.fmin(rule10, targetC_poco)
+rule11 = np.fmin(R_MediaCurva_MD_RSR_Poca_concentracion,R_SesgoCurva_MD_RSR_Sin_Sesgo)
+tip_rule11 = np.fmin(rule11, targetC_nada)
+rule12 = np.fmin(R_SesgoCurva_MD_RSR_Medio_Sesgado,R_SesgoCurva_MD_RSR_Sin_Sesgo)
+tip_rule12 = np.fmin(rule12, targetC_poco)
+
+
+
+
+tip0 = np.zeros_like(targetC)
+
+################################################################
+########## Visualización de la aplicación de reglas ############
+
+
+fig, ax0 = plt.subplots(figsize=(8, 9))
+
+ax0.fill_between(targetC, tip0, tip_rule1, facecolor='b', alpha=0.7)
+ax0.plot(targetC, targetC_mucho, 'b', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule2, facecolor='g', alpha=0.7)
+ax0.plot(targetC, targetC_medio, 'g', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule3, facecolor='r', alpha=0.7)
+ax0.plot(targetC, targetC_poco, 'r', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule4, facecolor='y', alpha=0.7)
+ax0.plot(targetC, targetC_poco, 'y', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule5, facecolor='c', alpha=0.7)
+ax0.plot(targetC, targetC_poco, 'c', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule6, facecolor='m', alpha=0.7)
+ax0.plot(targetC, targetC_poco, 'm', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule7, facecolor='k', alpha=0.7)
+ax0.plot(targetC, targetC_nada, 'k', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule8, facecolor='b', alpha=0.7)
+ax0.plot(targetC, targetC_nada, 'b', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule9, facecolor='g', alpha=0.7)
+ax0.plot(targetC, targetC_nada, 'g', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule10, facecolor='r', alpha=0.7)
+ax0.plot(targetC, targetC_medio, 'r', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule11, facecolor='y', alpha=0.7)
+ax0.plot(targetC, targetC_poco, 'y', linewidth=0.5, linestyle='--', )
+ax0.fill_between(targetC, tip0, tip_rule12, facecolor='c', alpha=0.7)
+ax0.plot(targetC, targetC_nada, 'c', linewidth=0.5, linestyle='--', )
+ax0.set_title('Activacion de la Funcion de pertenencia de salida')
+
+# Turn off top/right axes
+for ax in (ax0,):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
+plt.tight_layout()
+
+
+
+
+################################################################
+################ Agregación y Defusificación ###################
+aggregated1 = np.fmax(tip_rule1,np.fmax(tip_rule2, tip_rule3))
+aggregated2 = np.fmax(aggregated1,np.fmax(tip_rule4, tip_rule5))
+aggregated3 = np.fmax(aggregated2,np.fmax(tip_rule6, tip_rule7))
+aggregated4 = np.fmax(aggregated3,np.fmax(tip_rule8, tip_rule9))
+aggregated5 = np.fmax(aggregated4,np.fmax(tip_rule10, tip_rule11))
+aggregated = np.fmax(aggregated5,tip_rule12)
+# Calculate defuzzified result
+
+tip = fuzz.defuzz(targetC, aggregated, 'centroid')
+
+
+################################################################
+##############Visualización de la salida########################
+tip_activation = fuzz.interp_membership(targetC, aggregated, tip)  # for plot
+fig, ax0 = plt.subplots(figsize=(8, 3))
+
+ax0.plot(targetC, targetC_nada, 'b', linewidth=0.5, linestyle='--', )
+ax0.plot(targetC, targetC_poco, 'g', linewidth=0.5, linestyle='--')
+ax0.plot(targetC, targetC_medio, 'r', linewidth=0.5, linestyle='--')
+ax0.plot(targetC, targetC_mucho, 'y', linewidth=0.5, linestyle='--')
+ax0.fill_between(targetC, tip0, aggregated, facecolor='Orange', alpha=0.7)
+ax0.plot([tip, tip], [0, tip_activation], 'k', linewidth=1.5, alpha=0.9)
+ax0.set_title('Aggregated membership and result (line)')
+
+# Turn off top/right axes
+for ax in (ax0,):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
+plt.tight_layout()
+
+##################################################################################
+#####pertenencia del centroide para clasificarlo##################################
+
+print('El centroide es:')
+print(tip)
+y_nada=0
+y_poco=0
+y_medio=0
+y_mucho=0
+
+if tip>=0 and tip<0.2:
+    y_nada=5*tip
+    
+if tip>=0.2 and tip<0.4:    
+    y_poco=(5*tip)-1
+    
+if tip>=0.4 and tip<0.6:
+    y_medio=(5*tip)-2
+    
+if tip>=0.6 and tip<=0.8:
+    y_mucho=(5*tip)-3
+
+vec=[y_nada,y_poco,y_medio,y_mucho]
+grado_de_pertenencia=max(vec)
+
+if grado_de_pertenencia == vec[0]:
+    print("Pertenece a nada para ser pulsar con un grado de pertenencia del: ",grado_de_pertenencia)
+    print("Entonces no es conciderado una estrella pulsar.")
+
+if grado_de_pertenencia == vec[1]:
+    print("Pertenece a poco para ser pulsar con un grado de pertenencia del: ",grado_de_pertenencia)
+    print("Entonces no es conciderado una estrella pulsar.")
+
+if grado_de_pertenencia == vec[2]:
+    print("Pertenece a medio para ser pulsar con un grado de pertenencia del: ",grado_de_pertenencia)
+    print("Entonces es conciderado una estrella pulsar.")
+
+
+if grado_de_pertenencia == vec[3]:
+    print("Pertenece a mucho para ser pulsar con un grado de pertenencia del: ",grado_de_pertenencia)
+    print("Entonces es conciderado una estrella pulsar.")
+
