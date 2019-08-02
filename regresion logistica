@@ -3,23 +3,19 @@ library(readr)
 library("corrplot")
 library("RColorBrewer")
 library("REdaS")
-pulsar_stars <- read_csv("C:/Users/GOR/Downloads/pulsar_stars.csv")
+pulsar_stars <- read_csv("C:/Users/GOR/Downloads/pulsar_stars.csv")#importamos el dataset pulsar_star
 View(pulsar_stars)
-pulsar_stars1<- pulsar_stars[1:3000,]
+pulsar_stars1<- pulsar_stars[1:3000,]#seleccionamos las 3000 primeras instancias para nuestro analisis
 
 #liempieza de datos
-
 sapply(pulsar_stars, function(x) sum(is.na(x)))#conteo y sumatoria de datos nulos, si es que existieran
-
 #no hay valores nulos
 
-
 #separacion TRAINING TEST
-
 set.seed(1945)
-ind <- sample(2, nrow(pulsar_stars), replace = TRUE, prob = c(0.7, 0.3))
-data1_train <- pulsar_stars[ind == 1, ]
-data1_train= data1_train[1:2100,]
+ind <- sample(2, nrow(pulsar_stars), replace = TRUE, prob = c(0.7, 0.3)) #seleccion de el 70% y 30% 
+data1_train <- pulsar_stars[ind == 1, ]                                  #para treining y testing, selccionando.
+data1_train= data1_train[1:2100,]                                        #a la vez valores aleatorios.
 data2_test <- pulsar_stars[ind == 2, ]
 data2_test= data2_test[1:900,]
 
@@ -27,18 +23,20 @@ data2_test= data2_test[1:900,]
 
 matriz1=cbind(pulsar_stars[1:9])
 
-corr <-cor(matriz1)
+corr <-cor(matriz1)#generamos la matriz de correlaciones
+#generamos la grafica de sombreado de la matriz de correlaciones
 corrplot(corr, type="upper", order="hclust",
          col=brewer.pal(n=8, name="RdYlBu"), method = "number",tl.cex = 0.7)
 corrplot(corr, type="upper", order="hclust",
          col=brewer.pal(n=8, name="RdYlBu"),tl.cex = 0.7)
 
-#Tarea de regresion/clasificaciÃ³n con variables originales.
+#Tarea de regresion/clasificacion con variables originales.
 
 
-dependiente<-data1_train$targetC
+dependiente<-data1_train$targetC#guardamos la variable independiente
+#generamos la regresion logistica del training
 reg_log=glm(data1_train$targetC~data1_train$MediaCurva.MD_RSR+data1_train$DEstandarCurva.MD_RSR+data1_train$Ex.kurtosis.PI+data1_train$Sesgo_PI+data1_train$Ex.kurtosisCurva.MD_RSR+data1_train$SesgoCurva.MD_RSR+data1_train$Media_PI+data1_train$DEstandar_PI,family=binomial("logit"))
-
+#generamos la estimada de la dependiente con los coeficientes de la regresión y los valores del testing
 y_estim = exp(reg_log$coefficients[1]+
                 reg_log$coefficients[2]*data2_test$MediaCurva.MD_RSR+
                 reg_log$coefficients[3]*data2_test$DEstandarCurva.MD_RSR+
@@ -60,75 +58,74 @@ y_estim = exp(reg_log$coefficients[1]+
 #TASA DE ACIERTOS DEL MODELO
 rango=range(y_estim) #Visualizamos el rango del vector 
 y_ordenada=sort(y_estim) #Ordenamos todos los valores del vector
-umbral=mean(rango)#Este es nuestro umbral
-y_estim_f=c()
-for(j in 1:length(y_estim)){
+umbral=mean(rango)#Este es nuestro umbral sacado de la media de los valores de la y_estim
+y_estim_f=c()#variable donde guardaremos los valores redondeados
+for(j in 1:length(y_estim)){#for para redondear los valores dependiendo del umbral
   if ( y_estim[j] < umbral) {
-    y_estim_f<-append(y_estim_f, 0, after = j)
+    y_estim_f<-append(y_estim_f, 0, after = j)#se guardara 0 si el valor no sobrepasa la media
   }
   if ( y_estim[j] >= umbral) { 
-    y_estim_f<-append(y_estim_f, 1, after = j)
+    y_estim_f<-append(y_estim_f, 1, after = j)#se guardara 1 si el valor es igual o sobrepasa la media
   }
 }
-Total_TRUE=sum((y_estim_f == data2_test$targetC)*1)#suma todos los TRUE
-Tasa_Aciertos_Original=Total_TRUE/length(y_estim_f)# Porcentaje de errorm
+Total_TRUE=sum((y_estim_f == data2_test$targetC)*1)#sumatorio de la comparación de los valores redondeado con los verdaderos
+Tasa_Aciertos_Original=Total_TRUE/length(y_estim_f)# Porcentaje de aciertos de la regresión con training
 
 
 
-
-
-#AnAlisis factorial de los dato
-
-#formulacion del problema
+#Analisis factorial de los datos
 
 #analisis de la matriz de corelacion 
-
-bmatriz<-data1_train[,1:8]
-bt=bartlett.test(bmatriz)
-
+bmatriz<-data1_train[,1:8]#guardamos los valores dependientes
+bt=bartlett.test(bmatriz)#generamos el test de barrlet con la matriz creada
 library("REdaS")
-kmo = KMOS(data1_train[,1:8])
+kmo = KMOS(data1_train[,1:8])#generamos el test de KMO con la matriz creada
 
 
 #extraccion de factores
 
 #metodos de componentes principales
-
-pulsar.pca = prcomp(data1_train[, 1:8], center = TRUE, scale. = TRUE) 
+#generación del analisis de componenetes principales
+pulsar.pca = prcomp(data1_train[, 1:8], center = TRUE, scale. = TRUE)
+#impresión del analisis
 print(pulsar.pca)
+#grafica de codo del analisis
 plot(pulsar.pca, type = "l")
-summary(pulsar.pca)
+summary(pulsar.pca)#impresión de la desviacion estandard, proporción de la varianza y la varianza acumulada de cada componente
 
 # Componentes Principales
+#genereación del dataframe de los componentes principales
 comp = predict(pulsar.pca, newdata=tail(data1_train[, 1:8], length(data1_train$Media_PI)))
 comp<-as.data.frame(comp)
 
 #determinacion del numero de factores
 
-summary(pulsar.pca)
+summary(pulsar.pca)#se determinará a través de la varianza acumulada de los factores
 
 #interpretacion de los factores
 
 #validacion del modelo
 
 matriz2=cbind(pulsar_stars[1:8])
-
+#generamos la matriz de correlaciones
 corr <-cor(matriz2)
+#generamos la grafica de sombreado de la matriz de correlaciones
 corrplot(corr, type="upper", order="hclust",
          col=brewer.pal(n=8, name="RdYlBu"), method = "number",tl.cex = 0.7)
 corrplot(corr, type="upper", order="hclust",
          col=brewer.pal(n=8, name="RdYlBu"),tl.cex = 0.7)
-
+#realizamos la regresión logistica con los componentes principales
 reg.log_pca<-glm(dependiente~comp$PC1+comp$PC2+comp$PC3,family=binomial("logit"))
-b0.pca<-reg.log_pca$coefficients[1]
-b1.pca<-reg.log_pca$coefficients[2]
-b2.pca<-reg.log_pca$coefficients[3]
-b3.pca<-reg.log_pca$coefficients[3]
+b0.pca<-reg.log_pca$coefficients[1]#guardamos cada coeficiente de la regresion en una variable
+b1.pca<-reg.log_pca$coefficients[2]#
+b2.pca<-reg.log_pca$coefficients[3]#
+b3.pca<-reg.log_pca$coefficients[3]#
 
 
-x1=comp$PC1[1:900]
-x2=comp$PC2[1:900]
-x3=comp$PC3[1:900]
+x1=comp$PC1[1:900]#guardamos cada componente en una variable
+x2=comp$PC2[1:900]#cogiendo solo el 30% como test
+x3=comp$PC3[1:900]#
+#generamos la estimada de la dependiente con los valores de los pca y los valores del test de los pca
 y_estim_pca=exp(b0.pca+b1.pca*x1+b2.pca*x2+b3.pca*x3)/(1+exp(b0.pca+b1.pca*x1+b2.pca*x2+b3.pca*x3))
 
 
@@ -138,27 +135,80 @@ y_ordenada1=sort(y_estim_pca) #Ordenamos todos los valores del vector
 umbral1=mean(rango1)#Este es nuestro umbral
 
 y_estim_f_pca=c()
-for(j in 1:length(y_estim_pca)){
+for(j in 1:length(y_estim_pca)){#for para redondear los valores dependiendo del umbral
   if ( y_estim_pca[j] < umbral1) {
-    y_estim_f_pca<-append(y_estim_f_pca, 0, after = j)
+    y_estim_f_pca<-append(y_estim_f_pca, 0, after = j)#se guardara 0 si el valor no sobrepasa el umbral
   }
   if ( y_estim_pca[j] >= umbral1) { 
-    y_estim_f_pca<-append(y_estim_f_pca, 1, after = j)
+    y_estim_f_pca<-append(y_estim_f_pca, 1, after = j)#se guardara 1 si el valor es igual o sobrepasa el umbral
   }
 }
-Total_TRUE1=sum((y_estim_f_pca == data2_test$targetC)*1)#suma todos los TRUE
-Tasa_Aciertos_Componentes=Total_TRUE1/length(y_estim_f_pca)# Porcentaje de errorm
+Total_TRUE1=sum((y_estim_f_pca == data2_test$targetC)*1)#sumatorio de la comparación de los valores redondeado con los verdaderos
+Tasa_Aciertos_Componentes=Total_TRUE1/length(y_estim_f_pca)# Porcentaje de aciertos de la regresión con PCA
 
 
-#COMPARACION
-
+#COMPARACION DATOS NORMALES VS COMPONENTES PRINCIPALES
+#comparamos cual de las dos regresiones ha obtenido mejor tasa de aciertos
 if (Tasa_Aciertos_Original > Tasa_Aciertos_Componentes) { 
   print ("La mejor opción para la predicción de datos es trabajar con la regresion logistica original con una tasa de error del 2%") 
 } else {  
   print ("La mejor opción para la predicción de datos es trabajar con la regresion logistica de componentes principales con una tasa de error del 16%")  
-}  
+}
+#CONCLUSIONES
+y_estim_cero= exp(reg_log$coefficients[1]+
+                    reg_log$coefficients[2]*0.30+
+                    reg_log$coefficients[3]*7+
+                    reg_log$coefficients[4]*-2+
+                    reg_log$coefficients[5]*-2+
+                    reg_log$coefficients[6]*-3+
+                    reg_log$coefficients[7]*-2+
+                    reg_log$coefficients[8]*6+
+                    reg_log$coefficients[9]*25)/(1+exp(reg_log$coefficients[1]+
+                                                         reg_log$coefficients[2]*0.30+
+                                                         reg_log$coefficients[3]*7+
+                                                         reg_log$coefficients[4]*-2+
+                                                         reg_log$coefficients[5]*-2+
+                                                         reg_log$coefficients[6]*-3+
+                                                         reg_log$coefficients[7]*-2+
+                                                         reg_log$coefficients[8]*6+
+                                                         reg_log$coefficients[9]*25))
 
 
 
+y_estim_uno=exp(reg_log$coefficients[1]+
+                  reg_log$coefficients[2]*212+
+                  reg_log$coefficients[3]*111+
+                  reg_log$coefficients[4]*9+
+                  reg_log$coefficients[5]*69+
+                  reg_log$coefficients[6]*34+
+                  reg_log$coefficients[7]*1141+
+                  reg_log$coefficients[8]*178+
+                  reg_log$coefficients[9]*60)/(1+exp(reg_log$coefficients[1]+
+                                                       reg_log$coefficients[2]*212+
+                                                       reg_log$coefficients[3]*111+
+                                                       reg_log$coefficients[4]*9+
+                                                       reg_log$coefficients[5]*69+
+                                                       reg_log$coefficients[6]*34+
+                                                       reg_log$coefficients[7]*1141+
+                                                       reg_log$coefficients[8]*178+
+                                                       reg_log$coefficients[9]*60))
+#COMPARACION DE LOGICA DIFUSA CON REGRESIÓN LOGÍSTICA
 
+y_estim_final=exp(reg_log$coefficients[1]+
+                  reg_log$coefficients[2]*180+
+                  reg_log$coefficients[3]*24.30+
+                  reg_log$coefficients[4]*5.6+
+                  reg_log$coefficients[5]*50+
+                  reg_log$coefficients[6]*8.5+
+                  reg_log$coefficients[7]*140+
+                  reg_log$coefficients[8]*120+
+                  reg_log$coefficients[9]*65)/(1+exp(reg_log$coefficients[1]+
+                                                       reg_log$coefficients[2]*180+
+                                                       reg_log$coefficients[3]*24.30+
+                                                       reg_log$coefficients[4]*5.6+
+                                                       reg_log$coefficients[5]*50+
+                                                       reg_log$coefficients[6]*8.5+
+                                                       reg_log$coefficients[7]*140+
+                                                       reg_log$coefficients[8]*120+
+                                                       reg_log$coefficients[9]*65))
 
