@@ -165,7 +165,7 @@ rule10 = np.fmin(R_MediaCurva_MD_RSR_Bastante_Concentracion,R_SesgoCurva_MD_RSR_
 tip_rule10 = np.fmin(rule10, targetC_poco)
 rule11 = np.fmin(R_MediaCurva_MD_RSR_Poca_concentracion,R_SesgoCurva_MD_RSR_Sin_Sesgo)
 tip_rule11 = np.fmin(rule11, targetC_nada)
-rule12 = np.fmin(R_SesgoCurva_MD_RSR_Medio_Sesgado,R_SesgoCurva_MD_RSR_Sin_Sesgo)
+rule12 = np.fmin(R_MediaCurva_MD_RSR_Normal,R_SesgoCurva_MD_RSR_Sin_Sesgo)
 tip_rule12 = np.fmin(rule12, targetC_poco)
 
 
@@ -293,4 +293,3 @@ if grado_de_pertenencia == vec[2]:
 if grado_de_pertenencia == vec[3]:
     print("Pertenece a mucho para ser pulsar con un grado de pertenencia del: ",grado_de_pertenencia)
     print("Entonces es conciderado una estrella pulsar.")
-
