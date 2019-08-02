@@ -23,15 +23,7 @@ data1_train= data1_train[1:2100,]
 data2_test <- pulsar_stars[ind == 2, ]
 data2_test= data2_test[1:900,]
 
-#RepresentaciÃ³n grÃ¡fica de los datos
-
-d = dist(pulsar_stars1[,1:8], method = "euclidean")
-fit = cmdscale(d,eig=TRUE, k=2) # k es el numero de dimensiones
-x = fit$points[,1] 
-y = fit$points[,2]
-plot(x,y)
-
-#RepresentaciÃ³n de correlaciones entre los datos
+#Representacion de correlaciones entre los datos
 
 matriz1=cbind(pulsar_stars[1:9])
 
@@ -41,7 +33,7 @@ corrplot(corr, type="upper", order="hclust",
 corrplot(corr, type="upper", order="hclust",
          col=brewer.pal(n=8, name="RdYlBu"),tl.cex = 0.7)
 
-#Tarea de regresiÃ³n/clasificaciÃ³n con variables originales.
+#Tarea de regresion/clasificaciÃ³n con variables originales.
 
 
 dependiente<-data1_train$targetC
@@ -85,7 +77,7 @@ Tasa_Aciertos_Original=Total_TRUE/length(y_estim_f)# Porcentaje de errorm
 
 
 
-#AnÃ¡lisis factorial de los dato
+#AnAlisis factorial de los dato
 
 #formulacion del problema
 
